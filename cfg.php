@@ -10,7 +10,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'Z');
 define('DB_PASSWD', '123456');
-define('DB_NAME', 'free_notify');
+define('DB_NAME', 'garbage');
 $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWD, DB_NAME);
 if ($mysqli->connect_error) {
 	echo "Не удалось подключиться к БД.(" . $mysqli->connect_errno . ')' . $mysqli->connect_error;

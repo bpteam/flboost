@@ -8,11 +8,11 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 ini_set('display_errors',1);
-require_once dirname(__FILE__).'/../lib3_stable/get_content/include.php';
+require_once dirname(__FILE__).'/../_coolLib/loader/include.php';
 require_once dirname(__FILE__).'/cfg.php';
 $url = 'https://www.fl.ru/rss/all.xml?subcategory=37&category=5';
-$gc = new GetContent\cGetContent();
-$gc->setEncodingName('utf8');
+$gc = new \GetContent\cSingleCurl();
+//$gc->setEncodingAnswer(false);
 $content = $gc->getContent($url);
 $feed = array();
 if(preg_match('%\(Все проекты:\s(?<category>((?!\s-\s).)*)((?:\s-\s)(?<subcategory>[^<]+))?\)</title>%ims', $content, $match)){
@@ -35,11 +35,25 @@ if(preg_match_all('%<item>\s*<title><\!\[CDATA\[(?<title>.*)\]\]></title>\s*<lin
 		$feed['row'][] = $row;
 	}
 }
-$reg = '#(парсер|собрать|парс|parser|pars|сбор|парсинг)#imsu';
+$reg = '%(парсер|собрать|парс|parser|pars|сбор|парсинг|скачать|загрузить|наполнить|слить)%imsu';
 foreach($feed['row'] as $project){
-	if(preg_match($reg,$project['title']) || preg_match($reg,$project['description'])){
+	preg_match('%https://www.fl.ru/projects/(?<id>\d+)/%', $project['link'], $match);
+	$project['id'] = $match['id'];
+	if((preg_match($reg,$project['title']) || preg_match($reg,$project['description'])) && isUnique($project)){
+		$query = "INSERT INTO `flboost` (`id`, `title`, `description`, `date`, `category`, `url`)
+			VALUES ({$project['id']}, '".$mysqli->escape_string($project['title'])."', '".$mysqli->escape_string($project['description'])."', '". $project['pubdate'] ."', '".implode("|",$project['category'])."', '{$project['link']}')";
+		$mysqli->query($query);
 		echo 'SEND!';
-		mail('zking.nothingz@gmail.com','ALERT NEW PJ ' . date('h:i:s d/m/Y'),$project['title'] . ' ' . $project['description']);
+		mail('zking.nothingz@gmail.com','ALERT ' . $project['title'], $project['title'] . "\n" . date('c',$project['pubdate']) . "\n" . $project['link'] . "\n" . $project['description']);
+	} else {
+		//echo 'NOT!';
 	}
 }
 echo 'done!';
+
+function isUnique($data){
+	global $mysqli;
+	$query = "SELECT url FROM `flboost` WHERE `id` = {$data['id']}";
+	$result = $mysqli->query($query);
+	return !$result->num_rows;
+}
