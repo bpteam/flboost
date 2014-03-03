@@ -44,7 +44,7 @@ foreach($feed['row'] as $project){
 			VALUES ({$project['id']}, '".$mysqli->escape_string($project['title'])."', '".$mysqli->escape_string($project['description'])."', '". $project['pubdate'] ."', '".implode("|",$project['category'])."', '{$project['link']}')";
 		$mysqli->query($query);
 		echo 'SEND!';
-		mail('zking.nothingz@gmail.com','ALERT ' . $project['title'], $project['title'] . "\n" . date('c',$project['pubdate']) . "\n" . $project['link'] . "\n" . $project['description']);
+		mail('bpteam22@gmail.com','ALERT ' . $project['title'], $project['title'] . "\n" . date('c',$project['pubdate']) . "\n" . $project['link'] . "\n" . $project['description']);
 	} else {
 		//echo 'NOT!';
 	}
