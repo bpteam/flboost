@@ -8,12 +8,11 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 ini_set('display_errors',1);
-require_once dirname(__FILE__).'/../_coolLib/loader/include.php';
+require_once dirname(__FILE__).'/../_coolLib/loader-curl-phantomjs-proxy/include.php';
 require_once dirname(__FILE__).'/cfg.php';
 $url = 'https://www.fl.ru/rss/all.xml?subcategory=37&category=5';
 $gc = new \GetContent\cSingleCurl();
-//$gc->setEncodingAnswer(false);
-$content = $gc->getContent($url);
+$content = $gc->load($url);
 $feed = array();
 if(preg_match('%\(Все проекты:\s(?<category>((?!\s-\s).)*)((?:\s-\s)(?<subcategory>[^<]+))?\)</title>%ims', $content, $match)){
 	$feed['category'] = $match['category'];
@@ -44,7 +43,7 @@ foreach($feed['row'] as $project){
 			VALUES ({$project['id']}, '".$mysqli->escape_string($project['title'])."', '".$mysqli->escape_string($project['description'])."', '". $project['pubdate'] ."', '".implode("|",$project['category'])."', '{$project['link']}')";
 		$mysqli->query($query);
 		echo 'SEND!';
-		mail('bpteam22@gmail.com','ALERT ' . $project['title'], $project['title'] . "\n" . date('c',$project['pubdate']) . "\n" . $project['link'] . "\n" . $project['description']);
+		mail('zking.nothingz@gmail.com','ALERT ' . $project['title'], $project['title'] . "\n" . date('c',$project['pubdate']) . "\n" . $project['link'] . "\n" . $project['description']);
 	} else {
 		//echo 'NOT!';
 	}
